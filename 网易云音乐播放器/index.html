@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>悠闲时光</title>
+  <style>
+    body,
+    ul,
+    dl,
+    dd {
+      margin: 0px;
+      padding: 0px;
+    }
+
+    .wrap {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: url('images/bg.jpg') no-repeat;
+      background-size: 100% 100%;
+    }
+
+    .play_wrap {
+      width: 800px;
+      height: 544px;
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      margin-left: -400px;
+      margin-top: -272px;
+      /* background-color: #f9f9f9; */
+    }
+
+    .search_bar {
+      height: 60px;
+      background-color: #1eacda;
+      overflow: hidden;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 11;
+    }
+
+    .search_bar img {
+      margin-left: 23px;
+    }
+
+    .search_bar input {
+      margin-right: 23px;
+      width: 296px;
+      height: 34px;
+      border-radius: 17px;
+      border: 0px;
+      background: url('images/zoom.png') 265px center no-repeat rgba(255, 255, 255, 0.45);
+      text-indent: 15px;
+      outline: none;
+    }
+
+    .center_con {
+      height: 435px;
+      background-color: rgba(255, 255, 255, 0.5);
+      display: flex;
+    }
+
+    .song_wrapper {
+      width: 200px;
+      height: 435px;
+      box-sizing: border-box;
+      padding: 10px;
+      list-style: none;
+      background: url('images/line.png') right center no-repeat;
+      position: relative;
+      overflow: auto;
+    }
+
+    .song_list li {
+      font-size: 12px;
+      color: #333;
+      line-height: 36px;
+      width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .song_list .active {
+      color: #da651e;
+    }
+
+    .player_con {
+      width: 400px;
+      height: 435px;
+      position: relative;
+    }
+
+    .disc {
+      position: absolute;
+      left: 73px;
+      top: 60px;
+      z-index: 9;
+    }
+
+    .cover {
+      position: absolute;
+      left: 125px;
+      top: 112px;
+      width: 150px;
+      height: 150px;
+      border-radius: 75px;
+      z-index: 8;
+    }
+
+    .comment_list {
+      width: 200px;
+      height: 435px;
+      box-sizing: border-box;
+      padding: 10px;
+      list-style: none;
+      background: url('images/line.png') left center no-repeat;
+      overflow: auto;
+      position: relative;
+    }
+
+    .comment_list dl {
+      padding-left: 55px;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .comment_list dt {
+      position: absolute;
+      left: 4px;
+      top: 0px;
+    }
+
+    .comment_list dt img {
+      width: 40px;
+      height: 40px;
+      border-radius: 20px;
+    }
+
+    .comment_list dd {
+      font-size: 12px;
+    }
+
+    .comment_list .name {
+      font-weight: bold;
+      color: #333;
+      margin-top: 5px;
+    }
+
+    .comment_list .detail {
+      color: #666;
+      margin-top: 5px;
+      line-height: 18px;
+    }
+
+    .audio_con {
+      height: 50px;
+      background-color: #f1f3f4;
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
+
+    .myaudio {
+      width: 800px;
+      height: 40px;
+      margin-top: 5px;
+      outline: none;
+      background-color: #f1f3f4;
+    }
+
+    /* 旋转的动画 */
+    @keyframes Rotate {
+      from {
+        transform: rotateZ(0);
+      }
+
+      to {
+        transform: rotateZ(360deg);
+      }
+    }
+
+    /* 旋转的类名 */
+    .autoRotate {
+      animation-name: Rotate;
+      animation-iteration-count: infinite;
+      animation-play-state: paused;
+      animation-timing-function: linear;
+      animation-duration: 5s;
+    }
+
+    /* 是否正在播放 */
+    .playing {
+      animation-play-state: running;
+    }
+
+    .play_bar {
+      position: absolute;
+      left: 200px;
+      top: -10px;
+      z-index: 10;
+      transform: rotate(-25deg);
+      transform-origin: 12px 12px;
+      transition: 1s;
+    }
+
+    /* 播放杆 转回去 */
+    .play_bar.playing {
+      transform: rotate(0);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="play_wrap" id="player">
+      <div class="search_bar">
+        <img src="./images/player_title.png" alt="" />
+        <input type="text" />
+      </div>
+      <div class="center_con">
+        <div class="song_wrapper">
+          <ul class="song_list">
+            <li>
+            </li>
+            <li>
+            </li>
+            <li>
+            </li>
+            <li>
+            </li>
+            <li>
+            </li>
+          </ul>
+        </div>
+        <div class="player_con">
+          <img src="./images/player_bar.png" class="play_bar " />
+          <!-- 黑胶碟片 -->
+          <img src="./images/disc.png" class="disc autoRotate " />
+          <img src="./images/cover.png" class="cover autoRotate " />
+        </div>
+        <div class="comment_list">
+          <div>
+            <dl>
+              <dt>
+                <img src="./images/5F3A9233.jpg" alt="" />
+              </dt>
+              <dd class="name">心悦</dd>
+              <dd class="detail">
+                和我一起听歌吧！
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="audio_con">
+        <audio controls autoplay loop class="myaudio"></audio>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="./lib//jquery-1.12.4.js"></script>
+  <script src="./lib/template-web.js"></script>
+  <!-- 歌曲列表模板 -->
+  <script id="songList" type="text/html">
+    {{each result.songs}}
+      <li data-id="{{$value.id}}">
+        {{$value.name}}--{{$value.artists[0].name}}
+      </li>
+    {{/each}}
+  </script>
+  <!-- 歌曲评论列表模板 -->
+  <script id="songCommentList" type="text/html">
+    {{each hotComments}}
+      <dl>
+        <dt>
+          <img src="{{$value.user.avatarUrl}}" alt="" />
+        </dt>
+        <dd class="name">{{$value.user.nickname}}</dd>
+        <dd class="detail">
+          {{$value.content}}
+        </dd>
+      </dl>
+    {{/each}}
+  </script>
+  <script>
+    //1.文本框设置键盘事件,搜索歌曲列表
+    $('input[type="text"]').on('keydown',function(e){
+      if(e.keyCode == 13){
+        var songName = $(this).val().trim();
+        //发送ajax请求
+        $.ajax({
+          url:'https://autumnfish.cn/search',
+          data:{
+            keywords:songName
+          },
+          success:function(backData){
+            var resHtml = template('songList',backData);
+            $('.song_list').html(resHtml);
+          }
+        });
+      }
+    })
+    //2. li设置单击事件. 
+    $('.song_list').on('click','li',function(){
+      //2.1 获取该点击的歌曲id
+      var songId = $(this).attr('data-id');
+      console.log(songId);
+
+      //2.2 发送ajax请求获取播放url
+      $.ajax({
+        url:'https://autumnfish.cn/song/url',
+        data:{
+          id:songId
+        },
+        success:function(backData){
+          //设置播放的url
+          $('.audio_con>audio').attr('src',backData.data[0].url);
+        }
+      });
+      //2.3 发送ajax请求获取评论列表,展示评论
+      $.ajax({
+        url:"https://autumnfish.cn/comment/music",
+        data:{
+          id:songId
+        },
+        success:function(backData){
+          var resHtml = template('songCommentList',backData);
+          $('.comment_list>div').html(resHtml);
+        }
+      });
+      //2.4 发送ajax请求获取歌曲封面
+      $.ajax({
+        url:'https://autumnfish.cn/song/detail',
+        data:{
+          ids:songId
+        },
+        success:function(backData){
+          console.log(backData);
+          $('.player_con>img').eq(2).attr('src',backData.songs[0].al.picUrl);
+        }
+      })
+    })
+  
+    //3. 播放暂停事件
+    $('.audio_con>audio').on('play',function(){
+      $('.player_con>img').addClass('playing');
+    })
+
+    $('.audio_con>audio').on('pause',function(){
+      $('.player_con>img').removeClass('playing');
+    })
+    
+  </script>
+</body>
+
+</html>
